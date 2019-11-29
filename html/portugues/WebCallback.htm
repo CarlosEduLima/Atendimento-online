@@ -1,0 +1,713 @@
+<HTML>
+
+<HEAD>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <META NAME="GENERATOR" Content="Microsoft Visual Studio 6.0">
+    <TITLE>Create a Callback</TITLE>
+    <SCRIPT ID=clientEventHandlersJS LANGUAGE=javascript>
+        //Globle variables
+        var varPhoneNumber = "";
+        var varSchedules = "";
+        var varTimezoneOffset = "0";
+        var varCaption = "Web callback service for "
+            //var varContactData = "";
+            //To receive server packed Caltype/Messge pairs 
+            //In order to facilitate further customization
+        var varCalltypeMessage = "<WCCALLTYPEMSG>"; //Will be replace by Server
+        var varCallTypePlaceHolder = "<WCCALLTYPE>";
+        var varCallTypeDescPlaceHolder = "<WCDESCRIPTION>";
+
+        var varByte16 = "\x10"; //chr(16);
+        var varByte15 = "\x0F"; //chr(15);
+        var varPreferredLanguageKey = "Preferred Language"; //one of call data keys
+        var varCommentKey = "Comment"; //another call data key
+
+        var HelpWindow; //Call type description window handle
+
+        //For debug only----
+        //varCalltypeMessage = varByte16+"key1"+varByte15+"Yiqing Zhang"+varByte16 + 
+        //"Key2"+varByte15+"Lida Zhang"+varByte16;
+        //---------- End of Debug
+
+        //For parsing calltype and calltype description
+        var aCallTypeKeys = new Array(); //Keep call type keys
+        var aCallTypeDes = new Array(); //Keep call type descriptions
+        //default return if nothing found
+        aCallTypeKeys[0] = "No Queue defined"
+        aCallTypeDes[0] = ""
+            //*************************************************************************************************
+            //DetectJavaScript: update value of the hidden field "varJavaScriptSupport" to "yes"
+            //If Java Script is not allowed, the value of this hidden field stays at "no"
+            //when Web Collab Server receives the form, it will check the filed "varJavaScriptSupport".
+            //If it is "yes", continue; Otherwise return general error page.
+            //Note: this field has to be filtered out from the contact data collection!
+            //*************************************************************************************************
+        function DetectJavaScript() {
+            document.frmWebCallback.varJavaScriptSupport.value = "yes";
+        }
+
+        //*************************************************************************************************
+        // Assume CalltypeKeys and its description are formated as key-value pairs
+        // example: <byte16>Key1<Byte15>Name1<Byte15>Description1<Byte16>Key2<Byte15>Name2<Byte15>description2<Byte16>...<Byte16>
+        // Function DecodeCallTypes takes this kind formated string as input
+        // It outputs parsed CallTypeName and CallTypeDescriotion in aCallTypeKeys[] and aCallTypeDesc[] arrays
+        // If input is empty, the default pair will be returned.
+        //**************************************************************************************************
+        function DecodeCallTypes(vCallTypes) {
+            var i = 0; //Index starting from 0
+            var vTemp = "";
+
+            var nPos1 = vCallTypes.indexOf(varByte16);
+            if (nPos1 < 0)
+                return; //Nothing there
+
+            var nPos2 = vCallTypes.indexOf(varByte16, nPos1 + 1); //The other half of the delimiter
+            while (nPos2 > 0) {
+                //found the other half
+                vTemp = vCallTypes.substring(nPos1 + 1, nPos2); //Key, name, and value
+                //Key1<Byte15>Name1<Byte15>Description1
+                var nPos3 = vTemp.indexOf(varByte15);
+                if (nPos3 > 0) {
+                    vTemp = vTemp.substr(nPos3 + 1); //name and description
+                    nPos3 = vTemp.indexOf(varByte15);
+                    if (nPos3 > 0) {
+                        aCallTypeKeys[i] = vTemp.substring(0, nPos3);
+                        aCallTypeDes[i] = vTemp.substr(nPos3 + 1);
+                    } else {
+                        aCallTypeKeys[i] = "Unknown";
+                        aCallTypeDes[i] = "Unknown";
+                    }
+                } else {
+                    aCallTypeKeys[i] = "Unknown";
+                    aCallTypeDes[i] = "Unknown";
+                }
+                i++;
+                nPos1 = nPos2;
+                nPos2 = vCallTypes.indexOf(varByte16, nPos1 + 1); //The other half of the delimiter
+            } //while
+        } //end of function
+
+        //**********************************************************
+        //Function PackSchdules()
+        //add schedules into varSchedules
+        //**********************************************************
+        function PackSchdules(vScheduleType,
+            vYear, vMonth, vDate, vHour, vMinute) {
+
+            if (varSchedules == "") {
+                varSchedules = varByte16;
+            }
+            varSchedules += vScheduleType + varByte15 +
+                vYear.toString() + varByte15 +
+                vMonth.toString() + varByte15 +
+                vDate.toString() + varByte15 +
+                vHour.toString() + varByte15 +
+                vMinute.toString() + varByte15 +
+                varByte16;
+        }
+
+        //*********************************************************
+        //CollectSchedules()
+        //*********************************************************
+        function CollectSchedules(vToday, vDateSelected, vTimeSelected) {
+
+            var vYear, vMonth, vDate, vHour1, vMinute1, vHour2, vMinute2;
+            var varStart = "ST"; //Starting time
+            var varEnd = "ET"; //Ending time
+            var varNoCall = "0";
+            var varToday = "1";
+            var varOneDay = "2";
+            var varTwoDay = "3";
+
+            vDate = vToday; //Create date object.
+
+            switch (vDateSelected) {
+
+                case varNoCall:
+                    //This schedule should be skipped!
+                    break;
+
+                case varToday:
+                    switch (vTimeSelected) {
+                        case "1":
+                            //8:00am-12:00pm
+                            vHour1 = 8;
+                            vMinute1 = 0;
+                            vHour2 = 12;
+                            vMinute2 = 0;
+                            break;
+                        case "2":
+                            //1:00pm-5:30pm
+                            vHour1 = 13;
+                            vMinute1 = 0;
+                            vHour2 = 17;
+                            vMinute2 = 30;
+                            break;
+                    }
+                    //IE counts month starting from 0 to 11!
+                    PackSchdules(varStart,
+                        vDate.getFullYear(),
+                        1 + vDate.getMonth(),
+                        vDate.getDate(),
+                        vHour1, vMinute1);
+
+                    PackSchdules(varEnd,
+                        vDate.getFullYear(),
+                        1 + vDate.getMonth(),
+                        vDate.getDate(),
+                        vHour2, vMinute2);
+
+                    break;
+
+                    //*************************************
+                case varOneDay:
+                    vDate.setDate(vDate.getDate() + 1); //Tomorrow
+                    switch (vTimeSelected) {
+                        case "1":
+                            //8:00am-12:00pm
+                            vHour1 = 8;
+                            vMinute1 = 0;
+                            vHour2 = 12;
+                            vMinute2 = 0;
+                            break;
+                        case "2":
+                            //1:00pm-5:30pm
+                            vHour1 = 13;
+                            vMinute1 = 0;
+                            vHour2 = 17;
+                            vMinute2 = 30;
+                            break;
+                    }
+                    PackSchdules(varStart,
+                        vDate.getFullYear(),
+                        1 + vDate.getMonth(),
+                        vDate.getDate(),
+                        vHour1, vMinute1);
+
+                    PackSchdules(varEnd,
+                        vDate.getFullYear(),
+                        1 + vDate.getMonth(),
+                        vDate.getDate(),
+                        vHour2, vMinute2);
+
+                    break;
+
+                    //*******************************************
+                case varTwoDay:
+                    vDate.setDate(vDate.getDate() + 2); //The day after tomorrow
+                    switch (vTimeSelected) {
+                        case "1":
+                            //8:00am-12:00pm
+                            vHour1 = 8;
+                            vMinute1 = 0;
+                            vHour2 = 12;
+                            vMinute2 = 0;
+                            break;
+                        case "2":
+                            //1:00pm-5:30pm
+                            vHour1 = 13;
+                            vMinute1 = 0;
+                            vHour2 = 17;
+                            vMinute2 = 30;
+                            break;
+                    }
+
+                    PackSchdules(varStart,
+                        vDate.getFullYear(),
+                        1 + vDate.getMonth(),
+                        vDate.getDate(),
+                        vHour1, vMinute1);
+
+                    PackSchdules(varEnd,
+                        vDate.getFullYear(),
+                        1 + vDate.getMonth(),
+                        vDate.getDate(),
+                        vHour2, vMinute2);
+
+                    break;
+            }
+        } //End of function
+
+
+        //**********************************************************
+        //Function GenerateSchdules()
+        //add schedules into varSchedules
+        //**********************************************************
+        function GenerateSchdules() {
+            //The first window
+            CollectSchedules(new Date(),
+                document.frmWebCallback.LstFirstDate.value,
+                document.frmWebCallback.LstFirstPeriod.value);
+
+
+            //The second window
+            CollectSchedules(new Date(),
+                document.frmWebCallback.LstSecondDate.value,
+                document.frmWebCallback.LstSecondPeriod.value);
+
+            //Time zone offset in minute
+            var vToday = new Date();
+            varTimezoneOffset = (vToday.getTimezoneOffset()).toString();
+
+        } //End of function
+
+
+        //**********************************************************
+        //Function GenerateContactData()
+        //Update globle variable varContactData
+        //**********************************************************
+        //function GenerateContactData(Key,Value){
+        //	if(varContactData==""){
+        //			varContactData = varByte16;
+        //		}
+        //	varContactData += Key + varByte15 + Value + varByte16;
+        //}
+
+        //**********************************************************
+        //Function GenerateCanonicalPhoneNumber()
+        //**********************************************************
+        function GenerateCanonicalPhoneNumber(vCountryCode, vAreaCode, vPhone) {
+
+            varPhoneNumber = "+" + vCountryCode + "(" + vAreaCode + ")" + vPhone;
+
+        }
+
+
+
+        //**********************************************************
+        //IsNumber?
+        //**********************************************************
+        function IsNumeric(aNumber) {
+            var aNum = /(^\d+$)/;
+            var bRC = false;
+
+            if (aNum.test(aNumber)) {
+                bRC = true;
+            } else {
+                alert("Please enter a valid number!");
+                bRC = false;
+            }
+            return bRC;
+        }
+
+        //*******************************************************
+        //validation
+        //*******************************************************
+        function validation() {
+
+            //****************************************************
+            //Contact Name
+            //****************************************************
+            if (document.frmWebCallback.txtCustomerName.value == "") {
+                alert("Please enter your name.");
+                document.frmWebCallback.txtCustomerName.focus();
+                return false;
+            }
+            //*****************************************************
+            //Area Code
+            //*****************************************************
+            if (document.frmWebCallback.txtAreaCode.value == "") {
+                alert("Please enter your area code.");
+                document.frmWebCallback.txtAreaCode.focus();
+                return false;
+            } else { //Check if it is a numeric value
+                if (IsNumeric(document.frmWebCallback.txtAreaCode.value)) {
+                    //It is a numeric value
+                    //Check if it is longer than 3 digits
+                    if (document.frmWebCallback.txtAreaCode.value.length > 3) {
+                        alert("Area code can not be longer than 3 numbers!");
+                        document.frmWebCallback.txtAreaCode.focus();
+                        return false;
+                    }
+                    //Continue
+                } else {
+                    document.frmWebCallback.txtAreaCode.focus();
+                    return false;
+                } //else
+            } //else
+            //************************************************
+            //Phone number
+            //************************************************
+            if (document.frmWebCallback.txtPhone.value == "") {
+                alert("Please enter your local phone number.");
+                document.frmWebCallback.txtPhone.focus();
+                return false;
+            } else { //Check if it is a numeric value
+                if (IsNumeric(document.frmWebCallback.txtPhone.value)) {
+                    //It is a numeric value
+                    //Check if it is longer than 10 digits
+                    if (document.frmWebCallback.txtPhone.value.length > 10) {
+                        alert("Phone number can not be longer than 10 numbers!");
+                        document.frmWebCallback.txtPhone.focus();
+                        return false;
+                    }
+                    //Continue
+                } else {
+                    document.frmWebCallback.txtPhone.focus();
+                    return false;
+                } //else
+            } //else
+
+            //************************************************
+            //Country code
+            //************************************************
+            if (document.frmWebCallback.txtCountryCode.value == "") {
+                //Use default "1" - US or Canada
+                document.frmWebCallback.txtCountryCode.value = "1";
+                //Continue;
+            } else { //Check if it is a numeric value
+                if (IsNumeric(document.frmWebCallback.txtCountryCode.value)) {
+                    //It is a numeric value
+                    //Check if it is longer than 2 digits
+                    if (document.frmWebCallback.txtCountryCode.value.length > 2) {
+                        alert("Country code can not be longer than 2 numbers!");
+                        document.frmWebCallback.txtCountryCode.focus();
+                        return false;
+                    }
+                    //Continue
+                } else {
+                    document.frmWebCallback.txtCountryCode.focus();
+                    return false;
+                } //else
+            } //else
+            //************************************************
+            //Preferred language - one Contact data fields
+            //************************************************
+            if (document.frmWebCallback.txtPreferredLang.value == "") {
+                //Use default "US English" - US or Canada
+                document.frmWebCallback.txtPreferredLang.value = "US English";
+                //continue
+            } else {
+                //Check length
+                var maxlength = 126;
+                if (document.frmWebCallback.txtPreferredLang.value.length > maxlength) {
+                    alert("Please restrain your input to 126 or less characters!")
+                    document.frmWebCallback.txtPreferredLang.focus();
+                    return false;
+                }
+
+                //Check if it contains "=" or "&".
+                //If any, alert user
+                if (document.frmWebCallback.txtPreferredLang.value.indexOf("=") >= 0 ||
+                    document.frmWebCallback.txtPreferredLang.value.indexOf("&") >= 0) {
+                    alert("Please avoid using '=' or '&' in the Contact data fields.");
+                    document.frmWebCallback.txtPreferredLang.focus();
+                    return false;
+                }
+            } //end else
+
+            //************************************************
+            //Comment area
+            //************************************************
+
+            var maxlength = 126;
+            if (document.frmWebCallback.txtComment.value.length > maxlength) {
+                alert("Please restrain your input to 126 or less characters!")
+                document.frmWebCallback.txtComment.focus();
+                return false;
+            }
+            //Check if it contains "=" or "&".
+            //If any, alert user
+
+
+            if (document.frmWebCallback.txtComment.value.indexOf("=") >= 0 ||
+                document.frmWebCallback.txtComment.value.indexOf("&") >= 0) {
+                alert("Please avoid using '=' or '&' in the Contact data fields.");
+                document.frmWebCallback.txtComment.focus();
+                return false;
+            }
+
+            //************************************************
+            //Call type - make sure there is one selected
+            //************************************************
+
+            if (document.frmWebCallback.varCallType.value.length == 0) {
+                alert("No support type selected!");
+                return false;
+            }
+
+            return true;
+        } //end of function
+
+        //***********************************************
+        function cmdSubmit_onclick() {
+            //First of all, do a sanity checking.
+            if (validation()) {
+                //Generate contact number
+                GenerateCanonicalPhoneNumber(document.frmWebCallback.txtCountryCode.value,
+                    document.frmWebCallback.txtAreaCode.value,
+                    document.frmWebCallback.txtPhone.value); //=>varPhoneNumber
+                document.frmWebCallback.varPhoneNumber.value = varPhoneNumber;
+
+                //GenerateContactData(varPreferredLanguageKey, document.frmWebCallback.txtPreferredLang.value);//=>add to varContactData
+                //GenerateContactData(varCommentKey, document.frmWebCallback.txtComment.value);//=>add to varContactData
+                //document.frmWebCallback.varContactData.value = varContactData;
+
+                GenerateSchdules(); //=>varSchedules & varTimezoneOffset
+                document.frmWebCallback.varSchedules.value = varSchedules;
+                document.frmWebCallback.varTimezoneOffset.value = varTimezoneOffset;
+
+                //get caption here!
+                varCaption += document.frmWebCallback.txtCustomerName.value;
+                document.frmWebCallback.varCaption.value = varCaption;
+
+                //---------- For Debug Only
+
+                /*
+                	alert("varPhoneNumber=" + document.frmWebCallback.varPhoneNumber.value +"\n"
+                	+"varSchedules=" + document.frmWebCallback.varSchedules.value + "\n"
+                	+"varTimezoneOffset=" + document.frmWebCallback.varTimezoneOffset.value + "\n"
+                	+"varCaption=" + document.frmWebCallback.varCaption.value +"\n"
+                	+"varPriority="+document.frmWebCallback.varPriority.value + "\n"
+                	+"varCallType=" + document.frmWebCallback.varCallType.value);
+                */
+                //---------- End of Debug
+
+                if (varSchedules == "") {
+                    //No schedule is selected!
+                    alert("You have not selected a single schedule!");
+                    varPhoneNumber = "";
+                    //varContactData = "";
+                    varSchedules = "";
+                    varTimezoneOffset = 0;
+                    varCaption = "";
+                    return false;
+                }
+                //----------For Debug only
+                /*
+                		varPhoneNumber = "";
+                		//varContactData = "";
+                		varSchedules = "";
+                		varTimezoneOffset = 0;
+                		varCaption = "";
+                */
+                //---------- End of Debug
+
+                return true; //return false;
+            } else {
+                //Reset global variables
+                varPhoneNumber = "";
+                //varContactData = "";
+                varSchedules = "";
+                varTimezoneOffset = 0;
+                varCaption = "";
+
+                return false;
+            }
+        }
+
+        /***********************************************************
+        //Try to use Java script to popup a CallType description window
+        //filled with calltypes and their descriptions
+        //further custermization could be put here
+        //But maintenance will be a challenge
+        //***********************************************************/
+
+        function cmdHelp_onclick() {
+            //Pops up Calltypes
+
+            //Create a new window if there is not any
+            if (HelpWindow != null) {
+                if (!HelpWindow.closed)
+                    return;
+            }
+            HelpWindow = window.open("", "CallTypeDescription", "width=300,height=400,scrollbars,resizable");
+            //HelpWindow.document.title = "Call Type Description";
+
+            //A template 
+            var vHelpContent = "<TR><TD><STRONG>" + varCallTypePlaceHolder +
+                "</STRONG></TD></TR><TR><TD>" + varCallTypeDescPlaceHolder + "</TD></TR>";
+            vHelpContent += "<TR><TD></TD></TR><TR><TD></TD></TR>";
+
+            //A button 
+            var vButton = "<TR><TD><P align=right><INPUT type=button value='Close' id=cmdClose name=cmdClose LANGUAGE=javascript onclick='return window.close()'></P></TD></TR>";
+
+            //Table header
+            HelpWindow.document.write("<P><TABLE cellSpacing=1 cellPadding=1 width='100%' border=1>");
+
+            //Tabel content<<==aCallTypeKeys(),aCallTypeDes()
+            var vResult = "";
+            var vTemp = "";
+            for (var i = 0; i < aCallTypeKeys.length; i++) {
+                var pos = vHelpContent.indexOf(varCallTypePlaceHolder);
+                vTemp = vHelpContent.substring(0, pos) + aCallTypeKeys[i] + vHelpContent.substring(pos + varCallTypePlaceHolder.length);
+                pos = vTemp.indexOf(varCallTypeDescPlaceHolder);
+                vResult = vResult + vTemp.substring(0, pos) + aCallTypeDes[i] + vTemp.substring(pos + varCallTypeDescPlaceHolder.length);
+            }
+            HelpWindow.document.write(vResult);
+
+            //Add a close button
+            HelpWindow.document.write(vButton);
+
+            //Table bottom  
+            HelpWindow.document.write("</TABLE></P>");
+
+        } //End of function
+
+        //***************************************************************
+        function window_onload() {
+
+            DetectJavaScript();
+            DecodeCallTypes(varCalltypeMessage);
+
+            //For debug only--------------------------------
+            //for (var i=0;i<aCallTypeKeys.length;i++){
+            //	alert(aCallTypeKeys[i]+"\n"+aCallTypeDes[i]);
+            //	}
+            //----------------------------------------------
+        }
+
+        //-->
+    </SCRIPT>
+    <link href="images/styles.css" rel="stylesheet" type="text/css">
+    <style type="text/css">
+        body {
+            margin-left: 0px;
+            margin-top: 0px;
+            margin-right: 0px;
+            margin-bottom: 0px;
+        }
+    </style>
+
+
+</HEAD>
+
+<BODY LANGUAGE=javascript onload="return window_onload()">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td class="t1Section" scope="col">
+                <table width="100%" border="0" cellspacing="0" cellpadding="2">
+                    <tr>
+                        <td class="infoSmall">Create a Callback! </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <FORM id=frmWebCallback name=frmWebCallback action="<WCSERVLET>" method=post>
+                                <p>
+                                    <input type="hidden" name="varUserRequest" value="REQ_WEB_CALLBACK">
+                                    <input type="hidden" name="varPhoneNumber">
+                                    <input type="hidden" name="varCaption">
+                                    <input type="hidden" name="varSchedules">
+                                    <input type="hidden" name="varTimezoneOffset">
+                                    <input type="hidden" name="varUserLanguage" value="<WCLANGUAGE>">
+                                    <input TYPE="hidden" name="varClientType" VALUE="JS">
+                                    <input TYPE="hidden" name="varJavaScriptSupport" VALUE="no">
+                                </p>
+                                <table width="100%" border="0" cellpadding="2" cellspacing="0">
+                                    <tr>
+                                        <td>
+                                            <p class="t1Group">Your Information </p>
+                                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                <tr class="t1Label">
+                                                    <td width="28%">Name:</td>
+                                                    <td width="72%">
+                                                        <INPUT name=varCustomerName class="t1Label" id=txtCustomerName style="WIDTH: 242px; HEIGHT: 22px" value="Your Name" size=30>
+                                                    </td>
+                                                </tr>
+                                                <tr class="t1Label">
+                                                    <td>Phone number: </td>
+                                                    <td>
+                                                        <INPUT name=varAreaCode class="t1Label" id=txtAreaCode style="WIDTH: 37px" value=416 size=4>
+                                                        <FONT face=Tahoma size=2>&nbsp;</FONT>
+                                                        <INPUT name=varPhone class="t1Label" id=txtPhone value=5551212> (area code + number) </td>
+                                                </tr>
+                                                <tr class="t1Label">
+                                                    <td>Country code: </td>
+                                                    <td>
+                                                        <INPUT name=varCountryCode class="t1Label" id=txtCountryCode style="WIDTH: 39px;" value=1 size=5>
+                                                    </td>
+                                                </tr>
+                                                <tr class="t1Label">
+                                                    <td>Urgency:</td>
+                                                    <td>
+                                                        <SELECT name=varPriority class="t1Label" id=LstPriority style="WIDTH: 100px">
+                              <OPTION value="100" selected>High</OPTION>
+                              <OPTION 
+        value="50">Medium</OPTION>
+                              <OPTION value="10">Low</OPTION>
+                            </SELECT>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <p class="t1Group">More Information</p>
+                                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                <tr class="t1Label">
+                                                    <td>Type of support : </td>
+                                                    <td>
+                                                        <SELECT name=varCallType class="t1Label" id=LstCallTypeKeys style="WIDTH: 247px">
+                              <WCCALLTYPELIST>
+                                                        </SELECT>
+                                                        <INPUT name=cmdHelp type=button class="bButton" id=cmdHelp onclick="return cmdHelp_onclick()" value=Help LANGUAGE=javascript>
+                                                    </td>
+                                                </tr>
+                                                <tr class="t1Label">
+                                                    <td>Language:</td>
+                                                    <td>
+                                                        <INPUT name=varPreferredLang class="t1Label" id=txtPreferredLang value="US English">
+                                                    </td>
+                                                </tr>
+                                                <tr class="t1Label">
+                                                    <td width="28%">Comment:</td>
+                                                    <td width="72%">
+                                                        <INPUT name=varComment class="t1Label" id=txtComment size=100>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <p class="t1Group">Scheduling Time:</p>
+                                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                <tr class="t1Label">
+                                                    <td width="28%">First attempt between: </td>
+                                                    <td width="27%">
+                                                        <SELECT name=varFirstPeriod class="t1Label" id=LstFirstPeriod style="WIDTH: 111px">
+                              <OPTION value=1 selected>08:00am-12:00pm</OPTION>
+                              <OPTION value=2>1:00pm-5:30pm</OPTION>
+                            </SELECT>
+                                                    </td>
+                                                    <td width="45%">When
+                                                        <SELECT name=varFirstDate class="t1Label" id=LstFirstDate style="WIDTH: 105px">
+                              <OPTION value=1 selected>Today</OPTION>
+                              <OPTION 
+        value=2>Tomorrow</OPTION>
+                              <OPTION value=3>The day after tomorrow</OPTION>
+                              <OPTION value=0>Don't Call</OPTION>
+                            </SELECT>
+                                                    </td>
+                                                </tr>
+                                                <tr class="t1Label">
+                                                    <td>Second attempt between: </td>
+                                                    <td><select name=varSecondPeriod class="t1Label" id=LstSecondPeriod style="WIDTH: 111px">
+                                <option value=1>08:00am-12:00pm</option>
+                                <option value=2 selected>1:00pm-5:30pm</option>
+                              </select></td>
+                                                    <td>When
+                                                        <select name=varSecondDate class="t1Label" id=LstSecondDate style="WIDTH: 105px">
+                                <option value=1 selected>Today</option>
+                                <option 
+        value=2>Tomorrow</option>
+                                <option value=3>The day after tomorrow</option>
+                                <option value=0>Don't Call</option>
+                              </select></td>
+                                                </tr>
+                                                <tr class="t1Label">
+                                                    <TD>
+                                                        <P align=right>&nbsp;
+                                                        </P>
+                                                    </TD>
+                                                    <TD> <input name=Submit type=submit class="bButton" id=cmdSubmit onClick="return cmdSubmit_onclick()" value=Submit language=javascript>
+                                                        <input name=cmdReset type=reset class="bButton" id=cmdReset value=Cancel></TD>
+                                                    <td>&nbsp;</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </FORM>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</BODY>
+
+</HTML>

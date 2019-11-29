@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml">
+
+     <form id="DeleteCallback">
+
+	<!-- INput Parameters -->
+        <var name="CallbackID"/>
+
+        <!-- OUTput Parameters -->
+        <var name="ErrorCode"/>
+
+ 
+	<!--Local parameters with standard names Input0-9 used to form GET request -->
+	<var name="varUserRequest"/>
+	<var name="varCallbackID"/>
+        
+        <!--Save input subdialog variables into parameters with standard names-->  
+	<block>
+  		<assign name="varUserRequest" expr="'REQ_VXML_DELETECALLBACK'"/>
+		<assign name="varCallbackID" expr="CallbackID"/>
+    	</block>
+	
+ 	<!--Send request to web-extention. Script is frozen until response arrives from.-->
+	 
+	<subdialog name="DeleteCallbackSubDialog" src="../hppcwis.dll" 
+		method="get"   
+		namelist="varUserRequest varCallbackID"> 
+		
+		<!--Output parameters from web-extention response are saved into output subdialog variables.-->
+		<filled>
+  			<assign name="ErrorCode" expr="DeleteCallbackSubDialog.varErrorCode"/>  			
+			
+			<if cond="ErrorCode=='0000'">
+			    <assign name="ErrorCode" expr="'0'"/>
+			</if>
+  		</filled>
+  	</subdialog>
+
+	<!-- Form output parameters from output list to calling VoiceXML script. -->
+        <block>
+        <return namelist="ErrorCode"/>
+      	</block>
+
+     </form>
+  </vxml>

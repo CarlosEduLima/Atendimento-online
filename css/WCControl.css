@@ -1,0 +1,72 @@
+html,
+body {
+    height: 100%;
+    overflow-y: hidden;
+}
+
+a:link {
+    text-decorAtion: none;
+    font-weight: bold;
+}
+
+a:visited {
+    color: #0000CC;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    font-weight: bold;
+}
+
+a:active {
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#rodape {
+    width: 100%;
+    line-height: 50px;
+    background: linear-gradient(to left, #b3c3cc, #095181);
+    text-align: center;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    padding: 10px;
+}
+
+form .area-block {
+    margin-bottom: 20px;
+}
+
+form .area-block .textarea {
+    width: 90%;
+    display: flex;
+    margin: auto;
+    padding: 7px;
+    font-size: 16px;
+    color: #095181;
+    border-radius: 4px;
+    border: 2px solid #ccddef;
+    outline-color: #095181;
+}
+
+form .btn {
+    display: inline;
+    color: #fff !important;
+    margin: auto;
+    min-width: 100px;
+    text-decoration: none;
+    background: #095181;
+    padding: 7px;
+    border-radius: 15px;
+    border: none;
+    font-size: 16px;
+    font-weight: lighter;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+form .btn:hover {
+    background: #2a87bc;
+    box-shadow: 5px 40px -10px rgba(0, 0, 0, 0.57);
+}

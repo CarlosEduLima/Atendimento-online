@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml">
+
+     <form id="QueryAgentStatus">
+
+	<!-- INput Parameters -->
+        <var name="inAgentID"/>
+        <var name="inDevice"/>
+
+        <!-- OUTput Parameters -->
+        <var name="outAgentID"/>
+        <var name="outDevice"/>
+  	<var name="AgentStatus"/>
+
+        <var name="ErrorCode"/>
+
+ 
+	<!--Local parameters -->
+	<var name="varUserRequest"/>
+	<var name="varAgentId"/>
+	<var name="varDevice"/>
+        
+        <!--Save input subdialog variables into local parameters -->  
+	<block>
+  		<assign name="varUserRequest" expr="'REQ_VXML_QUERYAGENTSTATUS'"/>
+		<assign name="varAgentId" expr="inAgentID"/>
+		<assign name="varDevice" expr="inDevice"/>
+		
+    	</block>
+	
+ 	<!--Send request to web-extention. Script is frozen until response arrives from.-->
+	 
+	<subdialog name="QueryAgentStatusSubdialog" src="../hppcwis.dll" 
+		method="get"   
+		namelist="varUserRequest varAgentId varDevice"> 
+		
+		<!--Output parameters from web-extention response are saved into output subdialog variables.-->
+		<filled>
+  			<assign name="ErrorCode" expr="QueryAgentStatusSubdialog.varErrorCode"/>  			
+			
+			<if cond="ErrorCode=='0000'">
+	  			<assign name="outAgentID" expr="QueryAgentStatusSubdialog.varAgentID"/>  
+			     	<assign name="outDevice" expr="QueryAgentStatusSubdialog.varDevice"/>
+				<assign name="AgentStatus" expr="QueryAgentStatusSubdialog.varAgentStatus"/>
+				<assign name="ErrorCode" expr="'0'"/>
+			</if>
+  		</filled>
+  	</subdialog>
+
+	<!-- Form output parameters from output list to calling VoiceXML script. -->
+        <block>
+        <return namelist="outAgentID outDevice AgentStatus ErrorCode"/>
+      	</block>
+
+     </form>
+  </vxml>

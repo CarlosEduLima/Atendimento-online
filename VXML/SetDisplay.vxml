@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+ <vxml version="2.0" xmlns="http://www.w3.org/2001/vxml" >
+
+     <form id="SetDisplay">
+	
+	<!-- input parameters -->
+	<var name="CallID"/>
+        <var name="DisplayInfo"/>
+
+	
+	<!-- Output parameters -->
+  	<var name="ErrorCode"/>
+
+	<!--Local parameters with standard names Input0-9 used to form GET request -->
+	<var name="varUserRequest"/>
+	<var name="varCallID"/>
+	<var name="varDisplayInfo"/>
+	
+
+	
+	<!--Save input subdialog variables into parameters with standard names-->  
+	<block>
+  		<assign name="varUserRequest" expr="'REQ_VXML_SETDISPLAYINFO'"/>
+		<assign name="varCallID" expr="CallID"/>
+		<assign name="varDisplayInfo" expr="DisplayInfo"/>
+
+    	</block>
+	
+	<!--Send request to web-extention.Script is frozen until response arrives from. -->
+	 
+	<subdialog name="SetDisplaySubdialog" src="../hppcwis.dll" 
+		method="get"   
+		namelist="varUserRequest varCallID varDisplayInfo">  
+		
+		<!--Output parameters from web-extention response are saved into output subdialog variables.-->
+		<filled> 
+  			<assign name="ErrorCode" expr="SetDisplaySubdialog.varErrorCode"/>
+			<if cond="ErrorCode=='0000'">
+				<assign name="ErrorCode" expr="'0'"/>
+			</if>
+  		</filled>
+  	</subdialog>
+
+	<!-- Form output parameters from output list to calling VoiceXML script. -->
+	<block>
+		<assign name="ErrorCode" expr="0"/>
+		<return namelist="ErrorCode"/>
+  	</block>
+      </form>
+  
+ </vxml>
+
+ 	
+	
+
+
+

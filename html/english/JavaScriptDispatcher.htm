@@ -1,0 +1,128 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>US English</title>
+
+<script language="JavaScript">
+<!--
+var pushUrl="<WCPUSHURL>";
+var deltaMessage="<WCCHATDATA>";
+var errorCode="<WCERRORCODE>";
+var agentKey="<WCAGENTKEY>";
+var deltaTimer; // timer to refresh dispatcher
+
+function isUrlPush(){
+	if(pushUrl.length==0)
+	{
+		return false;
+	}
+	else {
+
+		var width = 600, height = 400; // defaults
+		if (top.document.layers) {
+			width = top.window.innerWidth;
+    			height = top.window.innerHeight;
+		}
+		else if (top.document.all) {
+    			width = top.document.body.clientWidth;
+    			height = top.document.body.clientHeight;
+		}
+		width+=40; height+=80;
+
+		window.open(pushUrl,'HPPC70_CHAT_ESCORT',
+//PTR->42748		'width=400,height=400,toolbar=1,resizable=1,scrollbars=1');
+		'width='+ width +',height='+ height +',toolbar=1,resizable=1,scrollbars=1');
+		window.focus();
+		return true;
+	}
+}
+
+function isNewDelta(){
+
+	if( deltaMessage.length==0)
+		return false;
+	else {
+		window.parent.contentPage.document.writeln(deltaMessage);
+		window.parent.contentPage.scroll(0,999999); //comment it for load testing
+		return true;
+	}
+}
+
+function RefreshFrameSet()
+{
+	if (errorCode.length>0)
+	{// some errors during execution
+
+		if (errorCode == "53505")
+		{// session has been disconnected - press hang-up
+			parent.closeMainWindow = false;
+			parent.location.href = "<WCSERVLET>?varUserRequest=REQ_HANG_UP&varSessionID=<WCSESSIONID>&varUserLanguage=<WCLANGUAGE>";	//comment it for load testing
+			return;
+		}
+
+
+		if (window.parent.previousError!=errorCode)
+		{
+			window.parent.previousError = errorCode;
+			deltaMessage = window.parent.RunTimeError(errorCode);
+		}
+	}else
+	{
+		window.parent.previousError ="";
+	}
+
+	if (agentKey.length>0)
+		if (window.parent.agentKey != agentKey)
+		{
+			window.parent.agentKey = agentKey;
+			if (agentKey != '0000')
+			{
+				window.parent.statusPage.location.href="<WCSERVLET>?varUserRequest=REQ_STAT_PAGE&varPageName=CallMePage.htm&varUserLanguage=<WCLANGUAGE>";
+			} else
+			{
+				window.parent.statusPage.location.href="<WCSERVLET>?varUserRequest=REQ_STAT_PAGE&varPageName=CallMeNeutral.htm&varUserLanguage=<WCLANGUAGE>";
+			}
+		}
+	isNewDelta();
+	isUrlPush();
+	
+	processGuiWhoIsTyping();
+	
+	window.parent.isDispatcherUpdated = true;
+	deltaTimer = window.setTimeout('getDelta()', window.parent.PoolingInterval); //comment it for load testing
+}
+
+
+function getDelta()
+{
+	if (true == window.parent.isDispatcherUpdated)
+	{// update again
+		window.parent.isDispatcherUpdated = false;
+		document.DispatcherForm.submit();
+	}
+}
+
+function processGuiWhoIsTyping(){
+	if(parent.frames && parent.frames['statusPage']) {
+	   var elem = parent.frames['statusPage'].document.getElementById('divTextWhoIsTyping'); 
+	   if(elem != null){
+		   elem.innerHTML = "<WCWHOISTYPING>";
+		}
+	}
+	
+}
+
+
+//-->
+</script>
+</head>
+
+<body onLoad="javascript: RefreshFrameSet();">
+<form METHOD="GET" ACTION="<WCSERVLET>" NAME="DispatcherForm"">
+  <input type="hidden" name="varUserRequest" value="REQ_DELTA_CHAT">  
+  <input type="hidden" name="varSessionID" value="<WCSESSIONID>">
+  <input type="hidden" name="varIndexKey" value="<WCINDEX>">
+  <input type="hidden" name="varUserLanguage" value="<WCLANGUAGE>">
+</form>
+</body>
+</html>

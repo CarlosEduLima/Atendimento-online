@@ -1,0 +1,27 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Expires" CONTENT="-1">   
+<title>US English</title>
+
+<script language="Javascript">
+function smartHangup(){
+	var hangUpRequest;
+	
+	hangUpRequest =  window.parent.ServletURL+"?varUserRequest=REQ_HANG_UP";
+	hangUpRequest += "&varSessionID=";
+	hangUpRequest += window.parent.SessionID;	
+	hangUpRequest += "&varUserLanguage=";
+	hangUpRequest += window.parent.UserLanguage;
+	parent.location.href = hangUpRequest;
+	
+}
+</script>
+</head>
+
+<body onload="javascript:smartHangup();">
+
+</body>
+</html>

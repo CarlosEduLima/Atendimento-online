@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml">
+
+     <form id="QueryQueueStatistics">
+
+	<!-- INput Parameters -->
+        <var name="QueueName"/>
+	<var name="BusinessUnitName"/>
+
+        <!-- OUTput Parameters -->
+        <var name="CallsInQ"/>
+	<var name="EstimatedWait"/>
+        <var name="AverageWait"/>
+  	<var name="OldestCallinQueue"/>
+	<var name="ServiceLevel"/>
+        <var name="ErrorCode"/>
+
+ 
+	<!--Local parameters with standard names Input0-9 used to form GET request -->
+	<var name="varUserRequest"/>
+	<var name="varQueueName"/>
+	<var name="varBusinessUnitName"/>
+        
+        <!--Save input subdialog variables into parameters with standard names-->  
+	<block>
+  		<assign name="varUserRequest" expr="'REQ_VXML_QUERYQUEUESTATISTICS'"/>
+		<assign name="varQueueName" expr="QueueName"/>
+                <assign name="varBusinessUnitName" expr="BusinessUnitName"/>
+    	</block>
+	
+ 	<!--Send request to web-extention. Script is frozen until response arrives from.-->
+	 
+	<subdialog name="QueryQueueStatisticsSubDialog" src="../hppcwis.dll" 
+		method="get"   
+		namelist="varUserRequest varQueueName varBusinessUnitName"> 
+		
+		<!--Output parameters from web-extention response are saved into output subdialog variables.-->
+		<filled>
+  			<assign name="ErrorCode" expr="QueryQueueStatisticsSubDialog.varErrorCode"/>  			
+			
+			<if cond="ErrorCode=='0'">
+			     <assign name="CallsInQ" expr="QueryQueueStatisticsSubDialog.varCallsInQ"/>
+			     <assign name="EstimatedWait" expr="QueryQueueStatisticsSubDialog.varEstimatedWait"/>  
+			     <assign name="AverageWait" expr="QueryQueueStatisticsSubDialog.varAverageWait"/>
+			     <assign name="OldestCallinQueue" expr="QueryQueueStatisticsSubDialog.varOldestCallinQueue"/>
+			     <assign name="ServiceLevel" expr="QueryQueueStatisticsSubDialog.varServiceLevel"/>
+			<elseif cond="ErrorCode=='0000'"/>
+			        <assign name="CallsInQ" expr="QueryQueueStatisticsSubDialog.varCallsInQ"/>
+			        <assign name="EstimatedWait" expr="QueryQueueStatisticsSubDialog.varEstimatedWait"/>  
+			        <assign name="AverageWait" expr="QueryQueueStatisticsSubDialog.varAverageWait"/>
+			        <assign name="OldestCallinQueue" expr="QueryQueueStatisticsSubDialog.varOldestCallinQueue"/>
+			        <assign name="ServiceLevel" expr="QueryQueueStatisticsSubDialog.varServiceLevel"/>
+				<assign name="ErrorCode" expr="'0'"/>
+			</if>
+  		</filled>
+  	</subdialog>
+
+	<!-- Form output parameters from output list to calling VoiceXML script. -->
+        <block>
+        <return namelist="CallsInQ EstimatedWait AverageWait OldestCallinQueue ServiceLevel ErrorCode"/>
+      	</block>
+
+     </form>
+  </vxml>

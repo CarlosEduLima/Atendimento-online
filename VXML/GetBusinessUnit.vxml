@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+ <vxml version="2.0" xmlns="http://www.w3.org/2001/vxml" >
+
+     <form id="GetBusinessUnit">
+	
+	<!-- input parameters -->
+	<var name="CallID"/>
+	
+	<!-- Output parameters -->
+  	<var name="ErrorCode"/>
+	<var name="BusinessUnitName"/>
+
+	<!--Local parameters with standard names Input0-9 used to form GET request -->
+	<var name="varUserRequest"/>
+	<var name="varCallID"/>
+	
+	<!--Save input subdialog variables into parameters with standard names-->  
+	<block>
+  		<assign name="varUserRequest" expr="'REQ_VXML_GETBUSINESSUNIT'"/>
+		<assign name="varCallID" expr="CallID"/>
+    	</block>
+	
+	<!--Send request to web-extention.Script is frozen until response arrives from. -->
+	 
+	<subdialog name="GetBusinessUnitSubdialog" src="../hppcwis.dll" 
+		method="get"   
+		namelist="varUserRequest varCallID">  
+		
+		<!--Output parameters from web-extention response are saved into output subdialog variables.-->
+		<filled> 
+  			<assign name="ErrorCode" expr="GetBusinessUnitSubdialog.varErrorCode"/>
+			<if cond="ErrorCode=='0000'">
+				<assign name="ErrorCode" expr="'0'"/>
+				<assign name="BusinessUnitName" expr="GetBusinessUnitSubdialog.varBusUnitName"/>
+			</if>
+  		</filled>
+  	</subdialog>
+
+	<!-- Form output parameters from output list to calling VoiceXML script. -->
+	<block>
+		<return namelist="ErrorCode BusinessUnitName"/>
+  	</block>
+      </form>
+  
+ </vxml>
+
+ 	
+	
+
+
+

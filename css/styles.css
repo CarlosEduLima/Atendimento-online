@@ -1,0 +1,107 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100vh;
+}
+
+body {
+    background: linear-gradient(to left, #b3c3cc, #095181);
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    font-family: Roboto, Arial, sans-serif;
+}
+
+a:link {
+    color: #0000FF;
+    text-decorAtion: none;
+    font-weight: bold;
+}
+
+a:visited {
+    color: #0000CC;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    color: #0000FF;
+    font-weight: bold;
+}
+
+a:active {
+    color: #0000FF;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+h1 {
+    font-size: 20px;
+    letter-spacing: 1px;
+    margin: 20px 0;
+    color: #095181;
+    font-weight: lighter;
+}
+
+form {
+    margin: 40% 0 0 0;
+    background-color: white;
+    padding: 30px 25px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+form .input-block {
+    margin-bottom: 20px;
+}
+
+form .input-block label {
+    font-size: 20px;
+    color: #095181;
+}
+
+form .input-block input {
+    max-width: 250px;
+    display: flex;
+    margin-top: 8px;
+    padding: 7px;
+    font-size: 16px;
+    color: #095181;
+    border-radius: 4px;
+    border: 2px solid #ccddef;
+    outline-color: #095181;
+}
+
+form .btn {
+    display: block;
+    color: #fff !important;
+    margin: auto;
+    max-width: 340px;
+    text-decoration: none;
+    background: #095181;
+    padding: 7px;
+    border-radius: 15px;
+    border: none;
+    transition: all 0.4s ease 0s;
+    font-size: 16px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+form .btn:hover {
+    background: #2a87bc;
+    letter-spacing: 1px;
+    -webkit-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
+    -moz-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
+    box-shadow: 5px 40px -10px rgba(0, 0, 0, 0.57);
+    transition: all 0.4s ease 0s;
+}

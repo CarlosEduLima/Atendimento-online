@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml">
+    <form id="Response">
+		<var name="varErrorCode"/>
+		<var name="varCallID"/>
+		<var name="varCallsInQ"/>
+		<var name="varOriginalAni"/>
+		<var name="varOriginalDnis"/>
+		<var name="varUUID"/>
+		<var name="varVisits"/>
+		<var name="varInternalANI"/>
+		<var name="varInternalDNIS"/>
+		<var name="varTransitNumber"/>
+		<var name="varAgentID"/>
+		<var name="varAgentWaitTime"/>
+		<var name="varDescription"/>
+		<var name="varEstimatedWait"/>
+		<var name="varDestination"/>
+		<var name="varInitialPriority"/>
+		<var name="varAverageWait"/>
+		<var name="varOldestCallinQueue"/>
+		<var name="varServiceLevel"/>
+		<var name="varCallbackID"/>
+		<var name="varValue"/>
+		<var name="varPositionInQ"/>
+		<var name="varDevice"/>
+		<var name="varAgentStatus"/>
+		<var name="varOverallStatus"/>
+		<var name="varServerState"/>
+		<var name="varEntries"/>
+		<var name="varBusUnitName"/>
+
+
+		<block>
+	  		<assign name="varErrorCode" expr="'<WCVXMLRETURNCODE>'"/>
+	  		<assign name="varCallID" expr="'<WCVXMLCALLID>'"/>
+	  		<assign name="varCallsInQ" expr="'<WCVXMLCALLSINQ>'"/>
+	  		<assign name="varOriginalAni" expr="'<WCVXMLORIGINALANI>'"/>
+	  		<assign name="varOriginalDnis" expr="'<WCVXMLORIGINALDNIS>'"/>
+	  		<assign name="varUUID" expr="'<WCVXMLUUID>'"/>
+	  		<assign name="varVisits" expr="'<WCVXMLVISITS>'"/>
+	  		<assign name="varInternalANI" expr="'<WCVXMLINTERNALANI>'"/>
+	  		<assign name="varInternalDNIS" expr="'<WCVXMLINTERNALDNIS>'"/>
+	  		<assign name="varTransitNumber" expr="'<WCTRANSITNUMBER>'"/>
+			<assign name="varAgentID" expr="'<WCVXMLAGENTID>'"/>
+			<assign name="varAgentWaitTime" expr="'<WCVXMLAGENTWAITTIME>'"/>
+			<assign name="varDescription" expr="'<WCVXMLDESCRIPTION>'"/>
+			<assign name="varEstimatedWait" expr="'<WCVXMLESTIMATEDWAIT>'"/>
+			<assign name="varDestination" expr="'<WCVXMLDESTINATION>'"/>
+			<assign name="varInitialPriority" expr="'<WCVXMLINITIALPRIORITY>'"/>
+	        	<assign name="varAverageWait" expr="'<WCVXMLAVERAGEWAIT>'"/>
+		        <assign name="varOldestCallinQueue" expr="'<WCVXMLOLDESTCALLINQUEUE>'"/>
+          		<assign name="varServiceLevel" expr="'<WCVXMLSERVICELEVEL>'"/>
+			<assign name="varCallbackID"   expr="'<WCVXMLCALLBACKID>'"/>
+			<assign name="varValue"   expr="'<WCVXMLVALUE>'"/>
+			<assign name="varPositionInQ" expr="'<WCVXMLPOSITIONINQ>'"/>
+			<assign name="varDevice" expr="'<WCVXMLDEVICE>'"/>
+			<assign name="varAgentStatus" expr="'<WCVXMLAGENTSTATUS>'"/>
+			<assign name="varOverallStatus" expr="'<WCVXMLOVERALLSTATUS>'"/>
+			<assign name="varServerState" expr="'<WCVXMLSERVERSTATE>'"/>
+			<assign name="varEntries" expr="'<WCVXMLENTRIES>'"/>
+			<assign name="varBusUnitName" expr="'<WCBUSINESSUNITNAME>'"/>
+			
+	  		<return namelist = "varErrorCode varCallID varCallsInQ varOriginalAni varOriginalDnis varUUID varVisits varInternalANI varInternalDNIS varTransitNumber varAgentID varAgentWaitTime varDescription varEstimatedWait varDestination varInitialPriority varAverageWait varOldestCallinQueue varServiceLevel varCallbackID varValue varPositionInQ varDevice varAgentStatus varOverallStatus varServerState varEntries varBusUnitName"/>
+  		</block>
+  	</form>
+ </vxml>
+
+

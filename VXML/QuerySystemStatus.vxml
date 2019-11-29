@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml">
+
+     <form id="QuerySystemStatus">
+
+
+        <!-- OUTput Parameters -->
+        <var name="OverallStatus"/>
+        <var name="ServerState"/> 
+ 	<var name="Entries"/>
+        <var name="ErrorCode"/>
+
+ 
+	<!--Local parameters -->
+	<var name="varUserRequest"/>
+	
+        
+        <!--Save input subdialog variables into local parameters -->  
+	<block>
+  		<assign name="varUserRequest" expr="'REQ_VXML_QUERYSYSTEMSTATUS'"/>
+		
+    	</block>
+	
+ 	<!--Send request to web-extention. Script is frozen until response arrives from.-->
+	 
+	<subdialog name="QuerySystemStatusSubdialog" src="../hppcwis.dll" 
+		method="get"   
+		namelist="varUserRequest"> 
+		
+		<!--Output parameters from web-extention response are saved into output subdialog variables.-->
+		<filled>
+  			<assign name="ErrorCode" expr="QuerySystemStatusSubdialog.varErrorCode"/>  			
+			
+			<if cond="ErrorCode=='0000'">
+	  			<assign name="OverallStatus" expr="QuerySystemStatusSubdialog.varOverallStatus"/>  
+			     	<assign name="ServerState" expr="QuerySystemStatusSubdialog.varServerState"/>
+				<assign name="Entries" expr="QuerySystemStatusSubdialog.varEntries"/>
+				<assign name="ErrorCode" expr="'0'"/>
+			
+			<elseif cond="ErrorCode=='0001'"/>
+	  			<assign name="OverallStatus" expr="QuerySystemStatusSubdialog.varOverallStatus"/>  
+			     	<assign name="ServerState" expr="QuerySystemStatusSubdialog.varServerState"/>
+				<assign name="Entries" expr="QuerySystemStatusSubdialog.varEntries"/>
+				<assign name="ErrorCode" expr="'1'"/>
+			<elseif cond="ErrorCode=='0002'"/>
+	  			<assign name="OverallStatus" expr="QuerySystemStatusSubdialog.varOverallStatus"/>  
+			     	<assign name="ServerState" expr="QuerySystemStatusSubdialog.varServerState"/>
+				<assign name="Entries" expr="QuerySystemStatusSubdialog.varEntries"/>
+				<assign name="ErrorCode" expr="'2'"/>
+			<elseif cond="ErrorCode=='0003'"/>
+	  			<assign name="OverallStatus" expr="QuerySystemStatusSubdialog.varOverallStatus"/>  
+			     	<assign name="ServerState" expr="QuerySystemStatusSubdialog.varServerState"/>
+				<assign name="Entries" expr="QuerySystemStatusSubdialog.varEntries"/>
+				<assign name="ErrorCode" expr="'3'"/>
+			<elseif cond="ErrorCode=='0004'"/>
+	  			<assign name="OverallStatus" expr="QuerySystemStatusSubdialog.varOverallStatus"/>  
+			     	<assign name="ServerState" expr="QuerySystemStatusSubdialog.varServerState"/>
+				<assign name="Entries" expr="QuerySystemStatusSubdialog.varEntries"/>
+				<assign name="ErrorCode" expr="'4'"/>
+			<elseif cond="ErrorCode=='0005'"/>
+	  			<assign name="OverallStatus" expr="QuerySystemStatusSubdialog.varOverallStatus"/>  
+			     	<assign name="ServerState" expr="QuerySystemStatusSubdialog.varServerState"/>
+				<assign name="Entries" expr="QuerySystemStatusSubdialog.varEntries"/>
+				<assign name="ErrorCode" expr="'5'"/>
+			<elseif cond="ErrorCode=='0006'"/>
+	  			<assign name="OverallStatus" expr="QuerySystemStatusSubdialog.varOverallStatus"/>  
+			     	<assign name="ServerState" expr="QuerySystemStatusSubdialog.varServerState"/>
+				<assign name="Entries" expr="QuerySystemStatusSubdialog.varEntries"/>
+				<assign name="ErrorCode" expr="'6'"/>
+			<elseif cond="ErrorCode=='0007'"/>
+	  			<assign name="OverallStatus" expr="QuerySystemStatusSubdialog.varOverallStatus"/>  
+			     	<assign name="ServerState" expr="QuerySystemStatusSubdialog.varServerState"/>
+				<assign name="Entries" expr="QuerySystemStatusSubdialog.varEntries"/>
+				<assign name="ErrorCode" expr="'7'"/>
+			<elseif cond="ErrorCode=='0008'"/>
+	  			<assign name="OverallStatus" expr="QuerySystemStatusSubdialog.varOverallStatus"/>  
+			     	<assign name="ServerState" expr="QuerySystemStatusSubdialog.varServerState"/>
+				<assign name="Entries" expr="QuerySystemStatusSubdialog.varEntries"/>
+				<assign name="ErrorCode" expr="'8'"/>
+			<elseif cond="ErrorCode=='0009'"/>
+	  			<assign name="OverallStatus" expr="QuerySystemStatusSubdialog.varOverallStatus"/>  
+			     	<assign name="ServerState" expr="QuerySystemStatusSubdialog.varServerState"/>
+				<assign name="Entries" expr="QuerySystemStatusSubdialog.varEntries"/>
+				<assign name="ErrorCode" expr="'9'"/>
+			<elseif cond="ErrorCode=='0010'"/>
+	  			<assign name="OverallStatus" expr="QuerySystemStatusSubdialog.varOverallStatus"/>  
+			     	<assign name="ServerState" expr="QuerySystemStatusSubdialog.varServerState"/>
+				<assign name="Entries" expr="QuerySystemStatusSubdialog.varEntries"/>
+				<assign name="ErrorCode" expr="'10'"/>
+			</if>
+  		</filled>
+  	</subdialog>
+
+	<!-- Form output parameters from output list to calling VoiceXML script. -->
+        <block>
+        <return namelist="OverallStatus ServerState Entries ErrorCode"/>
+      	</block>
+
+     </form>
+  </vxml>

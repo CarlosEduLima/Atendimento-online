@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml">
+
+     <form id="Enqueue">
+
+	<!-- INput Parameters -->
+        <var name="CallID"/>
+        <var name="IVRHold"/>
+        <var name="QueueName"/>
+        <var name="InitialPriority"/>
+        <var name="Description"/>
+        <var name="AgentId"/>
+	<var name="AgentWaitTime"/>
+
+        <!-- OUTput Parameters -->
+        <var name="EstimatedWait"/>
+        <var name="CallsInQ"/>  	
+        <var name="ErrorCode"/>
+
+ 
+	<!--Local parameters with standard names Input0-9 used to form GET request -->
+	<var name="varUserRequest"/>
+	<var name="varCallID"/>
+	<var name="varIVRHold"/>
+	<var name="varQueueName"/>
+	<var name="varInitialPriority"/>
+	<var name="varDescription"/>
+	<var name="varAgentId"/>
+	<var name="varAgentWaitTime"/>
+        
+        <!--Save input subdialog variables into parameters with standard names-->  
+	<block>
+  		<assign name="varUserRequest" expr="'REQ_VXML_ENQUEUE'"/>
+		<assign name="varCallID" expr="CallID"/>
+		<assign name="varIVRHold" expr="IVRHold"/>
+		<assign name="varQueueName" expr="QueueName"/>
+		<assign name="varInitialPriority" expr="InitialPriority"/>
+		<assign name="varDescription" expr="Description"/>
+		<assign name="varAgentId" expr="AgentId"/>
+		<assign name="varAgentWaitTime" expr="AgentWaitTime"/>
+    	</block>
+	
+ 	<!--Send request to web-extention. Script is frozen until response arrives from.-->
+	 
+	<subdialog name="EnqueueSubdialog" src="../hppcwis.dll" 
+		method="get"   
+		namelist="varUserRequest varCallID varIVRHold varQueueName varInitialPriority varDescription varAgentId varAgentWaitTime"> 
+		
+		<!--Output parameters from web-extention response are saved into output subdialog variables.-->
+		<filled>
+  			<assign name="ErrorCode" expr="EnqueueSubdialog.varErrorCode"/>  			
+			
+			<if cond="ErrorCode=='0000'">
+	  		    <assign name="EstimatedWait" expr="EnqueueSubdialog.varEstimatedWait"/>  
+			    <assign name="CallsInQ" expr="EnqueueSubdialog.varCallsInQ"/>
+			    <assign name="ErrorCode" expr="'0'"/>
+			</if>
+  		</filled>
+  	</subdialog>
+
+	<!-- Form output parameters from output list to calling VoiceXML script. -->
+        <block>
+        <return namelist="EstimatedWait CallsInQ ErrorCode"/>
+      	</block>
+
+     </form>
+  </vxml>

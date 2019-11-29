@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml">
+
+     <form id="Initialize">
+
+        <!-- In Parameters -->
+        <var name="UniqueID"/>
+        <var name="ANI"/>
+        <var name="DNIS"/>
+
+        <!-- Out Variables -->
+        <var name="CallID"/>
+  	<var name="ErrorCode"/>
+        
+	<!--Local parameters with standard names Input0-9 used to form GET request -->
+	<var name ="varUserRequest"/>
+	<var name="varUniqueID"/>
+	<var name="varANI"/>
+	<var name="varDNIS"/>
+	
+	
+	<!--Save input subdialog variables into parameters with standard names-->  
+	<block>
+  		<assign name="varUserRequest" expr="'REQ_VXML_INITIALIZE'"/>
+		<assign name="varUniqueID" expr="UniqueID"/>
+		<assign name="varANI" expr="ANI"/>
+		<assign name="varDNIS" expr="DNIS"/>		
+	</block>
+	
+	<!--Send request to web-extention. Script is frozen until response arrives from -->
+	
+	<subdialog name="InitializeSubdialog" src="../hppcwis.dll"
+	  method="get"
+	  namelist="varUserRequest varUniqueID varANI varDNIS">
+	  
+	<!--Output parameters from web-extention response are saved into output subdialog variables.-->
+          <filled>
+  		<assign name="ErrorCode" expr="InitializeSubdialog.varErrorCode"/>  			
+		<if cond="ErrorCode=='0000'">
+	  	   <assign name="CallID" expr="InitializeSubdialog.varCallID"/>
+		   <assign name="ErrorCode" expr="'0'"/>
+		</if>
+	 </filled> 
+  	</subdialog>
+	
+        <!-- Form output parameters from output list to calling VoiceXML script. -->
+	<block>
+	   <return namelist="CallID ErrorCode"/>
+  	</block>
+      </form>
+  
+ </vxml>

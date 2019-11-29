@@ -1,0 +1,158 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>US English</title>
+
+<script language="JavaScript">
+<!--
+NS4 = (navigator.appName == "Netscape" ) ? true : false;
+
+function FormatedPhoneNumber()
+{
+	var vstrCountryCode = document.CallMe.countryCode.value; if (vstrCountryCode==null) vstrCountryCode = "";
+	var vstrAreaCode = document.CallMe.areaCode.value; if (vstrAreaCode==null) vstrAreaCode = "";
+	var vstrNumber = document.CallMe.localNumber.value; if (vstrNumber=="") return "";
+	var strNumber="";	
+	
+
+	// if country code is entered then we must pass "+"
+	if ( vstrCountryCode != "") strNumber = "%2b" + vstrCountryCode +" ";
+    
+	// if area code is entered, let's put brackets around the number
+	if ( vstrAreaCode != "") strNumber = strNumber + "(" + vstrAreaCode + ") ";
+    
+	// let's append the number field now
+	strNumber = strNumber + vstrNumber;
+
+	// if countryCode and areaCode are empty then strip all " " and "-"
+	if ( vstrCountryCode=="" && vstrAreaCode=="")
+	{
+		vstrNumber = strNumber;
+		strNumber = "";
+		for (var i=0; i < vstrNumber.length; i++)
+		if ((vstrNumber.charAt(i) != ' ') && (vstrNumber.charAt(i)!='-')) strNumber+=vstrNumber.charAt(i);
+	}
+    	
+	return strNumber;
+
+}
+
+function CheckEnter(event)
+{
+
+  var code = 0;
+  if (NS4)
+  {
+	code = event.which;
+	if (0 == code) return true;
+	if (8 == code) return true;
+  }else
+  {
+	code = event.keyCode;
+  }
+
+  if (code<47 || code>57)
+  {
+	return false;
+  } 
+	return true;
+}
+
+function CheckPhoneNumber(event)
+{
+
+  var code = 0;
+  if (NS4)
+  {
+	code = event.which;
+	if (0 == code) return true;
+	if (8 == code) return true;
+  }else
+  {
+	code = event.keyCode;
+  }
+
+  if ((code<47 || code>57) && code!=45)
+  {
+	return false;
+  } 
+	return true;
+}
+
+function CallMeRequest()
+{
+	var callMeRequest;
+	
+	var f = FormatedPhoneNumber();
+	if (f == "")
+	{
+		return; //CallMeRefuse();
+	}else
+	{
+		callMeRequest =  window.parent.ServletURL+"?varUserRequest=REQ_CALLME";
+		callMeRequest += "&varSessionID=";
+		callMeRequest += window.parent.SessionID;	
+		callMeRequest += "&varAgentKey=";
+		callMeRequest += window.parent.agentKey;		
+		callMeRequest += "&varUserLanguage=";
+		callMeRequest += window.parent.UserLanguage;	
+		callMeRequest += "&varPhoneNumber=";
+		callMeRequest += f;		
+		this.location.href = callMeRequest;		
+	}
+
+}
+
+function CallMeRefuse()
+{
+	var callMeRefuse;
+	callMeRefuse = window.parent.ServletURL + "?varUserRequest=REQ_STAT_PAGE";
+	callMeRefuse += "&varPageName=CallMeNeutral.htm";
+	callMeRefuse += "&varUserLanguage=";
+	callMeRefuse += window.parent.UserLanguage;
+	this.location.href = callMeRefuse;
+}
+
+-->
+</script>
+
+<link href="images/styles.css" rel="stylesheet" type="text/css">
+
+<style type="text/css">
+<!--
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+}
+.style1 {font-size: 11px; padding: 0px; vertical-align: middle; margin-top: 5px; margin-right: 2px; margin-bottom: 5px; font-family: Tahoma, Verdana, Arial;}
+.style2 {font-size: 11px; background-color: #EBEBEB; padding: 3px 8px; margin: 3px; border: 1px solid #9B9B9D; font-family: Tahoma, Verdana, Arial;}
+-->
+</style></head>
+<body>
+<table width="100%"  border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td class="panelBackground"><table width="100%"  border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td class="help"><FORM ACTION="_CallMeConfirm.htm" METHOD="GET" NAME="CallMe" class="form">
+  Please, provide a callback number:
+      <INPUT name="countryCode" class="t1Label" id="countryCode" onkeypress="return CheckEnter(event);" size=1 maxLength="3" >
+  (
+  <INPUT name="areaCode" class="t1Label" id="areaCode" onkeypress="return CheckEnter(event);" size=1 maxLength="4">
+  )
+  <INPUT name="localNumber" class="t1Label" id="localNumber" onkeypress="return CheckPhoneNumber(event);" size=10 maxLength="32">
+  <INPUT NAME="CallRequest" TYPE=button class="bButton" ID="CallRequest" onclick="javascript:CallMeRequest()" VALUE="OK">
+  <INPUT NAME="CallRefuse" TYPE=button class="bButton" ID="CallRefuse" onclick="javascript:CallMeRefuse()" VALUE="Cancel">
+        </form></td>
+      </tr>
+    </table></td>
+  </tr>
+</table>
+</body>
+</html>
+
+
+
+
+

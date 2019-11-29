@@ -1,0 +1,161 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title> </title>
+
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Expires" CONTENT="-1">
+    <script language="Javascript">
+        var textarea;
+        var typingStatus = false;
+        var lastTypedTime = new Date(0);
+        var typingDelayMillis = 4000;
+
+        function refreshTypingStatus() {
+            textarea = document.getElementById('varChatData');
+            if ((textarea != document.activeElement) || textarea.value == '' || new Date().getTime() - lastTypedTime.getTime() > typingDelayMillis) {
+                //"User stopped";
+                if (typingStatus) {
+                    typingStatus = false;
+                    notifyIsTyping('false');
+                }
+            } else {
+                //"User is typing";
+                if (!typingStatus) {
+                    typingStatus = true;
+                    notifyIsTyping('true');
+                }
+            }
+        }
+
+        function updateLastTypedTime() {
+            lastTypedTime = new Date();
+        }
+
+        function notifyIsTyping(status) {
+            var urlNotifyTyping = "<WCSERVLET>?varUserRequest=REQ_NOTIFY_TYPING_CHAT&varSessionID=<WCSESSIONID>&varUserLanguage=<WCLANGUAGE>&varIsTypingData=" + status;
+            submitAjaxRequest(urlNotifyTyping);
+        }
+
+        function submitAjaxRequest(url) {
+            var oReq = getXmlRequest(); //new XMLHttpRequest();
+            oReq.open("GET", url, true);
+            oReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            oReq.setRequestHeader("If-Modified-Since", "Thu, 1 Jan 1970 00:00:00 GMT");
+            oReq.setRequestHeader("Cache-Control", "no-cache");
+            oReq.send();
+        }
+
+        function getXmlRequest() {
+            var request;
+            if (window.XMLHttpRequest) { // Mozilla, Safari, ...
+                request = new XMLHttpRequest();
+            } else if (window.ActiveXObject) { // IE
+                try {
+                    request = new ActiveXObject('Msxml2.XMLHTTP');
+                } catch (e) {
+                    try {
+                        request = new ActiveXObject('Microsoft.XMLHTTP');
+                    } catch (e) {}
+                }
+            }
+            return request;
+        }
+
+        setInterval(refreshTypingStatus, 100);
+
+
+
+        var maxChatLen = 1000; //configurable size
+        NS4 = (document.layers) ? true : false;
+        var errorCode = "<WCERRORCODE>";
+        var isSubmitted = false;
+
+        function CheckEnter(event) {
+            var code = 0;
+
+            if (NS4) {
+                code = event.which;
+            } else {
+                code = event.keyCode;
+            }
+            if (code == 13) {
+                if (addToChat()) {
+                    document.ChatForm.submit();
+                    notifyIsTyping('false');
+                }
+                return false;
+            } else {
+                validation();
+                return true;
+            }
+        }
+
+        function validation() {
+            if (document.ChatForm.varChatData.value.length >= maxChatLen) {
+                document.ChatForm.varChatData.value = document.ChatForm.varChatData.value.substring(0, maxChatLen - 1);
+            }
+        }
+
+        function StartLoading() {
+            //check error
+            if (errorCode.length > 0) { //inform user about error
+                window.parent.contentPage.document.writeln(window.parent.RunTimeError(errorCode));
+            }
+
+            document.ChatForm.varChatData.focus();
+
+            if (true == window.parent.isDispatcherUpdated) { // update again
+                window.parent.isDispatcherUpdated = false; //comment it for load testing		
+                parent.dispatcher.document.DispatcherForm.submit(); //comment it for load testing		
+            }
+        }
+
+        function addToChat() {
+            if (false == isSubmitted) {
+                //parent.dispatcher.document.DispatcherForm.submit(); 	//USED FOR LOAD TEST ONLY!!!				
+                isSubmitted = true;
+                validation();
+                return true;
+            } else {
+                alert("Request was already submitted. Wait for update.");
+                return false;
+            }
+        }
+
+        function hangupButton() {
+            notifyIsTyping('false');
+            parent.closeMainWindow = false;
+            parent.location.href = "<WCSERVLET>?varUserRequest=REQ_HANG_UP&varSessionID=<WCSESSIONID>&varUserLanguage=<WCLANGUAGE>";
+        }
+
+
+        //-->
+    </script>
+
+    <link href="../../css/WCControl.css" rel="stylesheet" type="text/css">
+
+    </style>
+</head>
+
+<body vLink=#ffffff link=#ffffff onLoad="javascript:StartLoading();">
+    <div id="rodape">
+        <form METHOD="GET" ACTION="<WCSERVLET>" name="ChatForm" onSubmit="return addToChat();">
+            <input type="hidden" name="varUserRequest" value="REQ_ADD_TO_CHAT">
+            <input type="hidden" name="varSessionID" value="<WCSESSIONID>">
+            <input type="hidden" name="varUserLanguage" value="<WCLANGUAGE>">
+
+            <div class="area-block">
+                <textarea name="varChatData" class="textarea" placeholder="Digite uma menssagem" cols=35 rows=5 id="varChatData" wrap="VIRTUAL" onkeypress="updateLastTypedTime();return CheckEnter(event);" onblur="refreshTypingStatus();"></textarea>
+                <!-- onkeypress="return CheckEnter(event);" -->
+            </div>
+
+            <input type="button" class="btn" name="Submit" value="Enviar">
+            <a href="javascript:hangupButton()"><input type="button" class="btn" name="Submit" value="Encerrar Sessão"></a>
+
+        </form>
+    </div>
+</body>
+
+</html>

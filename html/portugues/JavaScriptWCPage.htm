@@ -1,0 +1,71 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>English</title>
+</head>
+<SCRIPT LANGUAGE="JavaScript">
+	var SessionID = "<WCSESSIONID>";
+	var UserLanguage = "<WCLANGUAGE>";
+	var ServletURL = "<WCSERVLET>";
+	var agentKey="0000";
+	var previousError="";
+	var PoolingInterval = '3000';
+	var closeMainWindow = true;
+	var isDispatcherUpdated = false;
+
+	function SevereServerError()
+	{
+		if (dispatcher.document.forms.length == 0) return true;
+		if (dispatcher.document.forms[0].name != "DispatcherForm") return true;
+		return false;
+	}
+
+	function RunTimeError(errorCode)
+	{
+	// 53502 - session does not exist
+		if (errorCode == "53502" ) 
+		return "<BR>Session does not exist or timed-out. Please, close chat window.<BR>";
+	// 53505 - session was already disconnected
+		if (errorCode == "53505" ) 
+		return "<BR>Session was disconnected. Please, press 'Hang-up' button' to obtain chat summary.<BR>";
+	//something else
+		return "<BR>"+"execution time error " + errorCode + " from OSCC<BR>";
+	}
+
+	function Hangup()
+	{
+		if (closeMainWindow)
+		{
+			var hangUpRequest;
+			hangUpRequest = ServletURL+"?varUserRequest=REQ_HANG_UP";
+			hangUpRequest += "&varSessionID="
+			hangUpRequest += SessionID;
+			hangUpRequest += "&varUserLanguage=";
+			hangUpRequest += UserLanguage;
+			window.open(hangUpRequest,'','left=20,top=20,width=500,height=500,toolbar=0,resizable=0, scrollbars=1')
+		}
+	}
+</SCRIPT>
+
+<frameset rows="*,85,100,0" framespacing="0" frameborder="NO" border="0"  onUnload="javascript:Hangup();">
+  <frame name="contentPage"  scrolling="auto" src="./Default.htm">
+  <frame name="statusPage"  src="<WCSERVLET>?varUserRequest=REQ_STAT_PAGE&varPageName=CallMeNeutral.htm&varUserLanguage=<WCLANGUAGE>" scrolling="no">
+  <frame name="controlPage" src="<WCSERVLET>?varUserRequest=REQ_ADD_TO_CHAT&varSessionID=<WCSESSIONID>&varUserLanguage=<WCLANGUAGE>" scrolling="no" noresize>
+  <frame name="dispatcher"  src="<WCSERVLET>?varUserRequest=REQ_DELTA_CHAT&varSessionID=<WCSESSIONID>&varUserLanguage=<WCLANGUAGE>&varIndex=0" scrolling="auto">
+</frameset>
+
+<noframes>
+<body>
+
+  <p>
+<font color="#009CFC" face="Arial" size="4">
+Sorry, you cannot chat with an agent.<br>
+  You must either have a Frames-capable browser with JavaScript ON,<br>
+  or have enabled Java in order to use Live Help.
+</font>
+</p>
+  </body>
+ </noframes>
+
+</html>
+

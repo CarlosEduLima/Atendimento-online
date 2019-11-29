@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+ <vxml version="2.0" xmlns="http://www.w3.org/2001/vxml" >
+     <form id="GetTransitNumber">
+	
+	<!--Input parameters -->
+	
+	<var name="CallID"/>
+	
+	
+	<!-- Output parameters -->
+  	<var name="ErrorCode"/>
+	<var name="TransitNumber"/>
+
+	<!--Local parameters with standard names varCallID-9 used to form GET request -->
+	<var name="varCallID"/>
+	<var name="varUserRequest"/>
+
+	
+	<!--Save input subdialog variables into parameters with standard names-->  
+	<block>
+  		<assign name="varUserRequest" expr="'REQ_VXML_GETTRANSITNUMBER'"/>
+		<assign name="varCallID" expr="CallID"/>
+    	</block>
+	
+         
+	<!--Send request to web-extention.Script is frozen until response arrives from. -->
+	 
+	<subdialog name="GetTransitNumberSubdialog" src="../hppcwis.dll" 
+		method="get"   
+		namelist="varUserRequest varCallID">  
+
+		
+		<!--Output parameters from web-extention response are saved into output subdialog variables.-->
+		<filled> 
+  			<assign name="ErrorCode" expr="GetTransitNumberSubdialog.varErrorCode"/>
+			<if cond="ErrorCode=='0000'">
+			    <assign name="TransitNumber" expr="GetTransitNumberSubdialog.varTransitNumber"/>
+			    <assign name="ErrorCode" expr="'0'"/>
+			</if>
+  		</filled>
+  	</subdialog>
+	
+	<!-- Form output parameters from output list to calling VoiceXML script. -->
+	<block>
+	   <!-- <prompt> transit number is <value expr="TransitNumber"/> </prompt> -->
+		<return namelist="TransitNumber ErrorCode"/>
+  	</block>
+      </form>
+  
+ </vxml>
+
+ 	
+	
+
+
+

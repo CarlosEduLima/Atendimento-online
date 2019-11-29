@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml">
+
+     <form id="QueryRoutingInfo">
+
+        <!-- INput Parameters -->
+        <var name="CallID"/>
+
+
+        <!-- OUTput Parameters -->
+        <var name="Destination"/>
+        <var name="AgentId"/>
+        <var name="AgentWaitTime"/>
+        <var name="Description"/>
+        <var name="InitialPriority"/>
+        <var name="EstimatedWait"/>
+        <var name="CallsInQ"/>  	
+        <var name="ErrorCode"/>
+
+
+	<!--Local parameters with standard names Input0-9 used to form GET request -->
+	<var name="varUserRequest"/>
+	<var name="varCallID"/>
+        
+        <!--Save input subdialog variables into parameters with standard names-->  
+	<block>
+  		<assign name="varUserRequest" expr="'REQ_VXML_QUERYROUTINGINFO'"/>
+		<assign name="varCallID" expr="CallID"/>
+		
+    	</block>
+	
+ 	<!--Send request to web-extention. Script is frozen until response arrives from.-->
+	 
+	<subdialog name="QueryRoutingInfoSubdialog" src="../hppcwis.dll" 
+		method="get"   
+		namelist="varUserRequest varCallID"> 
+		
+		<!--Output parameters from web-extention response are saved into output subdialog variables.-->
+		<filled>
+  			<assign name="ErrorCode" expr="QueryRoutingInfoSubdialog.varErrorCode"/>  			
+			
+			<if cond="ErrorCode=='0000'">
+
+			     <assign name="Destination" expr="QueryRoutingInfoSubdialog.varDestination"/>  
+			     <assign name="AgentId" expr="QueryRoutingInfoSubdialog.varAgentID"/>
+			     <assign name="AgentWaitTime" expr="QueryRoutingInfoSubdialog.varAgentWaitTime"/>
+			     <assign name="Description" expr="QueryRoutingInfoSubdialog.varDescription"/>
+			     <assign name="InitialPriority" expr="QueryRoutingInfoSubdialog.varInitialPriority"/>
+			     <assign name="EstimatedWait" expr="QueryRoutingInfoSubdialog.varEstimatedWait"/>
+			     <assign name="CallsInQ" expr="QueryRoutingInfoSubdialog.varCallsInQ"/>
+			     <assign name="ErrorCode" expr="'0'"/>
+
+			<elseif cond="ErrorCode=='0001'"/>
+	  		     <assign name="Destination" expr="QueryRoutingInfoSubdialog.varDestination"/>  
+			     <assign name="AgentId" expr="QueryRoutingInfoSubdialog.varAgentID"/>
+			     <assign name="AgentWaitTime" expr="QueryRoutingInfoSubdialog.varAgentWaitTime"/>
+			     <assign name="Description" expr="QueryRoutingInfoSubdialog.varDescription"/>
+			     <assign name="InitialPriority" expr="QueryRoutingInfoSubdialog.varInitialPriority"/>
+			     <assign name="EstimatedWait" expr="QueryRoutingInfoSubdialog.varEstimatedWait"/>
+			     <assign name="CallsInQ" expr="QueryRoutingInfoSubdialog.varCallsInQ"/>
+			     <assign name="ErrorCode" expr="'1'"/>
+
+			<elseif cond="ErrorCode=='0002'"/>
+			     <assign name="Destination" expr="QueryRoutingInfoSubdialog.varDestination"/>  
+			     <assign name="AgentId" expr="QueryRoutingInfoSubdialog.varAgentID"/>
+			     <assign name="AgentWaitTime" expr="QueryRoutingInfoSubdialog.varAgentWaitTime"/>
+			     <assign name="Description" expr="QueryRoutingInfoSubdialog.varDescription"/>
+			     <assign name="InitialPriority" expr="QueryRoutingInfoSubdialog.varInitialPriority"/>
+			     <assign name="EstimatedWait" expr="QueryRoutingInfoSubdialog.varEstimatedWait"/>
+			     <assign name="CallsInQ" expr="QueryRoutingInfoSubdialog.varCallsInQ"/>
+			     <assign name="ErrorCode" expr="'2'"/>
+
+			</if>
+  		</filled>
+  	</subdialog>
+
+	<!-- Form output parameters from output list to calling VoiceXML script. -->
+        <block>
+           <return namelist="Destination AgentId AgentWaitTime Description InitialPriority EstimatedWait CallsInQ ErrorCode"/>
+      	</block>
+
+     </form>
+  </vxml>
